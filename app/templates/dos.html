@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recomendaciones de Canciones</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <h1>Selecciona un Género para Recomendaciones</h1>
+    <form action="/dos" method="POST">
+        <label for="genero">Escoge un género:</label>
+        <select id="genero" name="genero">
+            <option value="cumbia">Cumbia</option>
+            <option value="huayno">Huayno</option>
+            <option value="marinera">Marinera</option>
+            <option value="vals">Vals</option>
+            <option value="criollo">Criollo</option>
+        </select>
+        <button type="submit">Recomendar</button>
+    </form>
+
+    {% if recomendaciones %}
+    <h2>Grafo de Recomendaciones</h2>
+    <!-- Aquí se inserta el grafo interactivo -->
+    {{ grafo_html|safe }}
+
+    <h2>Top 3 Recomendaciones</h2>
+    <ul>
+        {% for cancion in recomendaciones %}
+        <li>{{ cancion }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</body>
+</html>
+
+
