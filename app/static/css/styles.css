@@ -81,3 +81,19 @@ a.btn:hover {
     background-color: darkred;
     transform: scale(1.05);
 }
+
+/*para el otro grafo*/
+.grafo2-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+    width: 80%; 
+    max-width: 800px;
+    max-height: 600px; 
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}

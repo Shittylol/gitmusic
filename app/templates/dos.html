@@ -21,9 +21,11 @@
     </form>
 
     {% if recomendaciones %}
-    <h2>Grafo de Recomendaciones</h2>
+    <h2>Árbol de Recomendaciones</h2>
     <!-- grafo interactivo -->
-    {{ grafo_html|safe }}
+    <div class="grafo2-container">
+        {{ grafo_html|safe }}
+    </div>
 
     <h2>Top 3 Recomendaciones</h2>
     <ul>
