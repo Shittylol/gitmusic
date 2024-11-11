@@ -31,8 +31,8 @@ p {
     justify-content: center;
     align-items: center;
     margin: 20px auto;
-    width: 80%; /*Ajusta el tamaño del contenedor del grafo*/
-    max-width: 1000px; /*Limita el ancho máximo*/
+    width: 80%; 
+    max-width: 1000px; 
     border: 2px solid #ddd;
     border-radius: 10px;
     overflow: hidden;
@@ -81,5 +81,3 @@ a.btn:hover {
     background-color: darkred;
     transform: scale(1.05);
 }
-
-
