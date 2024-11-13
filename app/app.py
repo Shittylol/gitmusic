@@ -179,7 +179,7 @@ def index():
     grafo_html = construir_grafo_guitarra(file_path)
     data = {
         "titulo": "Grafo con forma de Guitarra",
-        "bienvenida": "BIENVENIDO A WEOLD"
+        "bienvenida": "GIT FUNCIONA O NO FUNCIONA IDKKKKKKKK"
     }
     return render_template("index.html", grafo_html=grafo_html, data=data)
 
