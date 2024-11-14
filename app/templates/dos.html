@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -22,7 +22,6 @@
 
     {% if recomendaciones %}
     <h2>Árbol de Recomendaciones</h2>
-    <!-- grafo interactivo -->
     <div class="grafo2-container">
         {{ grafo_html|safe }}
     </div>
@@ -34,5 +33,86 @@
         {% endfor %}
     </ul>
     {% endif %}
+</body>
+</html>
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Árbol de Recomendaciones</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Selecciona un Género para Recomendaciones</h1>
+    </header>
+    <main>
+        <!-- Formulario para seleccionar género -->
+        <section class="form-section">
+            <form action="/dos" method="POST">
+                <label for="genero">Escoge un género:</label>
+                <select id="genero" name="genero">
+                    <option value="cumbia">Cumbia</option>
+                    <option value="huayno">Huayno</option>
+                    <option value="marinera">Marinera</option>
+                    <option value="vals">Vals</option>
+                    <option value="criollo">Criollo</option>
+                </select>
+                <button type="submit">Recomendar</button>
+            </form>
+        </section>
+
+        <!-- Contenedor del grafo -->
+        <section class="grafo-section">
+            <h2>Árbol de Recomendaciones</h2>
+            <div class="grafo-container">
+                <!-- Aquí se incrustará el grafo -->
+                {{ grafo_html|safe }}
+            </div>
+        </section>
+        <h2>mathias vuelve por favor</h2>
+        <!-- Recomendaciones personalizadas -->
+        <section class="recomendaciones-section">
+            <h2>Recomendaciones Personalizadas</h2>
+            <div class="recomendaciones-container">
+                <div class="recomendacion-card">
+                    <h3>Canción 1</h3>
+                    <p><strong>Artista:</strong> Artista 1</p>
+                    <p><strong>Género:</strong> Cumbia</p>
+                    <p><strong>Popularidad:</strong> 85</p>
+                    <audio controls>
+                        <source src="#" type="audio/mpeg">
+                        Tu navegador no soporta la reproducción de audio.
+                    </audio>
+                    <button>Favoritos</button>
+                </div>
+                <div class="recomendacion-card">
+                    <h3>Canción 2</h3>
+                    <p><strong>Artista:</strong> Artista 2</p>
+                    <p><strong>Género:</strong> Vals</p>
+                    <p><strong>Popularidad:</strong> 78</p>
+                    <audio controls>
+                        <source src="#" type="audio/mpeg">
+                        Tu navegador no soporta la reproducción de audio.
+                    </audio>
+                    <button>Favoritos</button>
+                </div>
+                <div class="recomendacion-card">
+                    <h3>Canción 3</h3>
+                    <p><strong>Artista:</strong> Artista 3</p>
+                    <p><strong>Género:</strong> Criollo</p>
+                    <p><strong>Popularidad:</strong> 92</p>
+                    <audio controls>
+                        <source src="#" type="audio/mpeg">
+                        Tu navegador no soporta la reproducción de audio.
+                    </audio>
+                    <button>Favoritos</button>
+                </div>
+            </div>
+        </section>
+    </main>
 </body>
 </html>

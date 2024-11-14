@@ -19,6 +19,13 @@ h1 {
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 }
 
+h2 {
+    margin: 30px 0;
+    font-size: 2rem;
+    color: #ffffff;
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3);
+}
+
 p {
     font-size: 1.2em;
     margin: 20px 0;
@@ -26,18 +33,37 @@ p {
     color: #ffffff;
 }
 
-.grafo-container {
+/* Formulario */
+.form-section {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+form {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 20px auto;
-    width: 80%; 
-    max-width: 1000px; 
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: white;
+    gap: 10px;
+}
+
+label {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #222;
+}
+
+select {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-family: 'Poppins', sans-serif;
 }
 
 button {
@@ -61,6 +87,98 @@ button:hover {
     text-decoration: none;
 }
 
+/* Grafo */
+.grafo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px auto;
+    width: 80%;
+    max-width: 1000px;
+    height: 500px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    background-color: #FF6347;
+    color: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.grafo-container p {
+    margin: auto;
+    font-size: 1.5rem;
+    color: white;
+    text-align: center;
+}
+
+/* Recomendaciones */
+.recomendaciones-section {
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 1200px;
+}
+
+.recomendaciones-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.recomendacion-card {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    width: 300px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recomendacion-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.recomendacion-card h3 {
+    font-size: 1.5em;
+    font-family: 'Bebas Neue', sans-serif;
+    color: #222;
+}
+
+.recomendacion-card p {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #555;
+}
+
+audio {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.recomendacion-card button {
+    display: block;
+    margin-top: 15px;
+    padding: 10px 15px;
+    font-size: 1rem;
+    color: white;
+    background-color: #f0ad4e;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: background-color 0.3s ease;
+}
+
+.recomendacion-card button:hover {
+    background-color: #ec971f;
+}
+
+/* Botón adicional */
 a.btn {
     display: block;
     margin: 30px auto;
@@ -75,25 +193,10 @@ a.btn {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease, transform 0.2s ease;
     max-width: 400px;
+    text-decoration: none;
 }
 
 a.btn:hover {
     background-color: darkred;
     transform: scale(1.05);
-}
-
-/*para el otro grafo*/
-.grafo2-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px auto;
-    width: 80%; 
-    max-width: 800px;
-    max-height: 600px; 
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: white;
 }
