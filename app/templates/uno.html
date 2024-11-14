@@ -4,17 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Música Peruana</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/uno.css">
 </head>
-<body class="red-white-background">
-    <h1>Música Peruana</h1>
-    <p>La música peruana es un tesoro que refleja nuestra rica diversidad cultural.</p>
-    <p class="small-text">Desde la costa hasta la sierra y la selva, cada rincón del Perú tiene su propio ritmo y esencia.</p>
-    <img src="/static/musica_peruana_logo.jpg" alt="Los kipus, banda peruana de antano">
-    <br>
-    <a href="/dos">
-        <button>Continuar</button>
-    </a>
+<body>
+    <header>
+        <h1>Música Peruana</h1>
+    </header>
+    <main>
+        <!--texto intro  -->
+        <section class="intro-section">
+            <p>La música peruana es un tesoro que refleja nuestra rica diversidad cultural.</p>
+            <p class="small-text">Desde la costa hasta la sierra y la selva, cada rincón del Perú tiene su propio ritmo y esencia.</p>
+        </section>
+
+        <!--multimedia -->
+        <section class="media-section">
+            <div class="media-container">
+                <!--img a la izquierda -->
+                <div class="media-column">
+                    <img src="/static/musica_peruana_logo.jpg" alt="Imagen 1">
+                    <img src="/static/musica_peruana_logo.jpg" alt="Imagen 2">
+                    <img src="/static/musica_peruana_logo.jpg" alt="Imagen 3">
+                    <img src="/static/musica_peruana_logo.jpg" alt="Imagen 7">
+                </div>
+                <div class="frase-column">
+                    <p class="frase">La tradición vive en cada melodía dela musicascjdasdkjfhwrjghwrkjgwrhgwrkjghwrhtwejh</p> <!-- Frase entre columna y video -->
+                </div>
+                <!--video en el centro, si no le pongo embeded, no funca-->
+                <div class="media-column video-column">
+                    <iframe 
+                        src="https://www.youtube.com/embed/b5W4EQwU0wM" 
+                        title="Música Peruana" 
+                        frameborder="0" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <!--img a la derecha -->
+                <div class="frase-column">
+                    <p class="frase">La tradición vive en cada melodíaasjndkajshkfjewhkjrhwjkhrjktkjrhtjewhtkjerhjkwehhr</p> <!-- Frase entre columna y video -->
+                </div>
+                <div class="media-column">
+                    <img src="/static/musica_peruana_logo.jpg" alt="Imagen 4">
+                    <img src="/static/musica_peruana_logo.jpg" alt="Imagen 5">
+                    <img src="/static/musica_peruana_logo.jpg" alt="Imagen 6">
+                    <img src="/static/musica_peruana_logo.jpg" alt="Imagen 8">
+                </div>
+            </div>
+        </section>
+
+        <!--continuar -->
+        
+        <a href="/dos" class="button">Continuar</a>
+        
+    </main>
 </body>
 </html>
 

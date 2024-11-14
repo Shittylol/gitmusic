@@ -5,8 +5,8 @@ body {
     padding: 20px;
     text-align: center;
     font-family: 'Poppins', sans-serif;
-    background-color: #f80b0b;
-    color: #ffffff;
+    background-color: red;
+    color: white;
 }
 
 h1 {
@@ -33,7 +33,7 @@ p {
     color: #ffffff;
 }
 
-/* Formulario */
+/*forms */
 .form-section {
     margin: 20px 0;
     padding: 20px;
@@ -61,8 +61,8 @@ select {
     padding: 10px;
     font-size: 1rem;
     border-radius: 5px;
-    border: 1px solid #ccc;
-    background-color: #fff;
+    border: 1px solid white;
+    background-color: white;
     font-family: 'Poppins', sans-serif;
 }
 
@@ -87,7 +87,6 @@ button:hover {
     text-decoration: none;
 }
 
-/* Grafo */
 .grafo-container {
     display: flex;
     justify-content: center;
@@ -96,10 +95,10 @@ button:hover {
     width: 80%;
     max-width: 1000px;
     height: 500px;
-    border: 2px solid #ddd;
+    border: 2px solid white;
     border-radius: 10px;
     background-color: #FF6347;
-    color: #ffffff;
+    color: white;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     overflow: hidden;
 }
@@ -111,11 +110,11 @@ button:hover {
     text-align: center;
 }
 
-/* Recomendaciones */
+/*recomendar*/
 .recomendaciones-section {
     margin: 30px auto;
     padding: 20px;
-    background-color: #ffffff;
+    background-color: #702f2f;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     max-width: 1200px;
@@ -140,13 +139,13 @@ button:hover {
 
 .recomendacion-card:hover {
     transform: scale(1.05);
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 12px black;
 }
 
 .recomendacion-card h3 {
     font-size: 1.5em;
     font-family: 'Bebas Neue', sans-serif;
-    color: #222;
+    color: black;
 }
 
 .recomendacion-card p {
@@ -178,7 +177,6 @@ audio {
     background-color: #ec971f;
 }
 
-/* Botón adicional */
 a.btn {
     display: block;
     margin: 30px auto;
@@ -197,6 +195,6 @@ a.btn {
 }
 
 a.btn:hover {
-    background-color: darkred;
+    background-color: rgb(255, 209, 3);
     transform: scale(1.05);
 }

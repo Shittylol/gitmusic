@@ -1,42 +1,3 @@
-<!--<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recomendaciones de Canciones</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
-</head>
-<body>
-    <h1>Selecciona un Género para Recomendaciones</h1>
-    <form action="/dos" method="POST">
-        <label for="genero">Escoge un género:</label>
-        <select id="genero" name="genero">
-            <option value="cumbia">Cumbia</option>
-            <option value="huayno">Huayno</option>
-            <option value="marinera">Marinera</option>
-            <option value="vals">Vals</option>
-            <option value="criollo">Criollo</option>
-        </select>
-        <button type="submit">Recomendar</button>
-    </form>
-
-    {% if recomendaciones %}
-    <h2>Árbol de Recomendaciones</h2>
-    <div class="grafo2-container">
-        {{ grafo_html|safe }}
-    </div>
-
-    <h2>Top 3 Recomendaciones</h2>
-    <ul>
-        {% for cancion in recomendaciones %}
-        <li>{{ cancion }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-</body>
-</html>
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,7 +11,7 @@
         <h1>Selecciona un Género para Recomendaciones</h1>
     </header>
     <main>
-        <!-- Formulario para seleccionar género -->
+        <!--formulario para seleccionar género -->
         <section class="form-section">
             <form action="/dos" method="POST">
                 <label for="genero">Escoge un género:</label>
@@ -65,16 +26,14 @@
             </form>
         </section>
 
-        <!-- Contenedor del grafo -->
+        <!--grafo respuesta/arbol-->
         <section class="grafo-section">
             <h2>Árbol de Recomendaciones</h2>
             <div class="grafo-container">
-                <!-- Aquí se incrustará el grafo -->
                 {{ grafo_html|safe }}
             </div>
         </section>
-        <h2>las infidelidades de luis: GA</h2>
-        <!-- Recomendaciones personalizadas -->
+        <!--recomendaciones personalizadas -->
         <section class="recomendaciones-section">
             <h2>Recomendaciones Personalizadas</h2>
             <div class="recomendaciones-container">
@@ -83,6 +42,7 @@
                     <p><strong>Artista:</strong> Artista 1</p>
                     <p><strong>Género:</strong> Cumbia</p>
                     <p><strong>Popularidad:</strong> 85</p>
+                    <!--i guess -->
                     <audio controls>
                         <source src="#" type="audio/mpeg">
                         Tu navegador no soporta la reproducción de audio.
