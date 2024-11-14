@@ -187,9 +187,14 @@ def index():
 def mostrar_pagina_dos():
     return render_template("uno.html")
 
-@app.route("/dos")
+@app.route("/dos", methods=["GET", "POST"])
 def mostrar_pagina_dos_actual():
+    if request.method == "POST":
+        # Aquí procesas los datos del formulario
+        genero = request.form.get("genero", "Sin género seleccionado")
+        return render_template("dos.html", genero=genero)
     return render_template("dos.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
