@@ -1,5 +1,6 @@
 import pandas as pd
 import networkx as nx
+import os
 from pyvis.network import Network
 from flask import Flask, render_template, request
 from sklearn.metrics.pairwise import cosine_similarity
@@ -7,61 +8,106 @@ from sklearn.preprocessing import MinMaxScaler
 
 app = Flask(__name__)
 
-def cargar_canciones(file_path="BASE_DATE_MUSIC_COMPLEJIDAD.csv"):
-    data = pd.read_csv(file_path, encoding='latin-1')
-    data.columns = ["CANCION", "GRUPO/ARTISTA", "GENERO", "PUNTUACION", 
-                    "IMPACTO SOCIAL", "TIPO DE IMPACTO", "DESCRIPCION", "AÑO"]
-    
+# Asegúrate de que la ruta del archivo sea correcta
+file_path = os.path.join(r"C:\Users\andre\code\peruvianmusic\BASE_DATE_MUSIC.xlsx")
+
+# Verifica que el archivo exista
+if os.path.exists(file_path):
+    # Lee todas las columnas necesarias del archivo Excel
+    data = pd.read_excel(file_path, engine='openpyxl', usecols=["CANCION", "GRUPO/ARTISTA", "GENERO", "PUNTUACION", 
+                                                               "IMPACTO SOCIAL", "TIPO DE IMPACTO", "DESCRIPCION"])
+else:
+    print(f"El archivo no se encuentra en la ruta: {file_path}")
+
+# Cargar todos los nodos de canciones desde el archivo Excel
+def cargar_canciones(file_path):
+    print(f"Esta es la base de datos: {file_path}")
+    data = pd.read_excel(file_path, engine='openpyxl', usecols=["CANCION", "GRUPO/ARTISTA", "GENERO", "PUNTUACION", 
+                                                               "IMPACTO SOCIAL", "TIPO DE IMPACTO", "DESCRIPCION"])
     data['PUNTUACION'] = pd.to_numeric(data['PUNTUACION'], errors='coerce')
     data['IMPACTO SOCIAL'] = pd.to_numeric(data['IMPACTO SOCIAL'], errors='coerce')
-    
-    return data.sample(n=min(13, len(data)), random_state=42)
 
-def construir_grafo_guitarra(file_path):
-    canciones = cargar_canciones(file_path)
+    # Devolver todas las canciones
+    return data
 
+# Normalizar características y calcular similitudes
+def calcular_similitudes(canciones):
+    # Normalizar las características
+    scaler = MinMaxScaler()
+    canciones_features = canciones[['PUNTUACION', 'IMPACTO SOCIAL']].values
+    canciones_normalizadas = scaler.fit_transform(canciones_features)
+
+    # Calcular la similitud entre canciones
+    similitudes = cosine_similarity(canciones_normalizadas)
+    return similitudes
+
+def construir_grafo(canciones):
     G = nx.Graph()
 
-    posiciones = {
-        #cuerpo
-        0: (0, 0), 1: (2, 0), 2: (1, 1), 3: (0, 2), 4: (2, 2),
-        #mastil
-        5: (1, 3), 6: (1, 4), 7: (1, 5),
-        #cuerdas
-        8: (0.8, 3), 9: (1.2, 3), 10: (0.8, 4), 11: (1.2, 4), 12: (0.8, 5), 13: (1.2, 5),
-    }
+    # Calcular similitudes
+    similitudes = calcular_similitudes(canciones)
+    
+    # Generar una posición ficticia para cada nodo (canción)
+    posiciones = {idx: (idx // 40, idx % 40) for idx in range(len(canciones))}
 
-    nodos = list(posiciones.keys())
-    for idx, nodo in enumerate(nodos):
-        if idx < len(canciones):
-            cancion = canciones.iloc[idx]['CANCION']
-            G.add_node(nodo, label=cancion, pos=posiciones[nodo])
-        else:
-            G.add_node(nodo, label=f"Nodo {nodo}", pos=posiciones[nodo])
+    for idx, row in canciones.iterrows():
+        cancion = row['CANCION']
+        grupo = row['GRUPO/ARTISTA']
+        genero = row['GENERO']
+        puntuacion = row['PUNTUACION']
+        impacto_social = row['IMPACTO SOCIAL']
 
-    conexiones = [
-        (0, 1), (0, 2), (1, 2), (2, 3), (2, 4), (3, 4),
-        (2, 5), (5, 6), (6, 7),
-        (5, 8), (5, 9), (6, 10), (6, 11), (7, 12), (7, 13),
-    ]
-    G.add_edges_from([(a, b) for a, b in conexiones if a in G.nodes and b in G.nodes])
+        # Información emergente para el tooltip
+        info_tooltip = (
+            f"Canción: {cancion}\n"
+            f"Artista: {grupo}\n"
+            f"Género: {genero}\n"
+            f"Puntuación: {puntuacion}\n"
+            f"Impacto Social: {impacto_social}\n"
+        )
 
-    net = Network(height="750px", width="100%", bgcolor="#FF6347", font_color="white")
+
+        # Agregar nodo con la información emergente (tooltip)
+        G.add_node(idx, label=cancion, pos=posiciones[idx], 
+                genero=genero, tipo_impacto=row['TIPO DE IMPACTO'], title=info_tooltip)
+
+    print('Aca nfor')  # OPTIMIZAR
+    for i in range(len(canciones) - 1):
+        for j in range(i + 1, len(canciones)):
+            # Verificar que compartan el mismo género y tipo de impacto
+            if (canciones['GENERO'][i] == canciones['GENERO'][j] and 
+                canciones['TIPO DE IMPACTO'][i] == canciones['TIPO DE IMPACTO'][j]):
+
+                # Verificar si la similitud entre las canciones supera un umbral
+                if similitudes[i][j] > 0.5:  # Puedes ajustar el umbral de similitud
+                    # Verificar que no haya más de 3 conexiones por canción
+                    if len(list(G.neighbors(i))) < 3 and len(list(G.neighbors(j))) < 3:
+                        G.add_edge(i, j, weight=similitudes[i][j])
+    print('Aca n')
+
+    # Generando el grafo visualmente
+    net = Network(height="750px", width="100%", bgcolor="#fab802", font_color="white")
+    print('Aca n1')
     for node, pos in nx.get_node_attributes(G, 'pos').items():
-        net.add_node(node, label=G.nodes[node]['label'], x=pos[0] * 300, y=-pos[1] * 300, fixed=True)
+        net.add_node(node, label=G.nodes[node]['label'], 
+                    title=G.nodes[node]['title'],  # Tooltip con información
+                    x=pos[0] * 300, y=pos[1] * 100, fixed=True)
+    print('Aca n1')
     for edge in G.edges:
-        net.add_edge(*edge, width=6) 
+        net.add_edge(*edge, width=6)
+    print('Aca n2')
+
     return net.generate_html()
 
+# Página principal
 @app.route("/")
 def index():
-    file_path = "BASE_DATE_MUSIC_COMPLEJIDAD.csv"
-    grafo_html = construir_grafo_guitarra(file_path)
-    data = {
-        "titulo": "Grafo con forma de Guitarra",
-        "bienvenida": "WEOLD"
-    }
-    return render_template("index.html", grafo_html=grafo_html, data=data)
+    canciones = cargar_canciones(file_path)
+    grafo_html = construir_grafo(canciones)
+    return render_template("index.html", grafo_html=grafo_html, data={
+        "titulo": "Grafo de Canciones",
+        "bienvenida": "BIENVENIDO A WEOLD"
+    })
 
 @app.route("/uno")
 def mostrar_pagina_dos():
