@@ -9,70 +9,69 @@
 <body>
     <header>
         <h1>Selecciona un Género para Recomendaciones</h1>
+        <hr style="border: 6px dashed rgb(255, 191, 0);width: 50%">
     </header>
     <main>
-        <!--formulario para seleccionar género -->
         <section class="form-section">
             <form action="/dos" method="POST">
                 <label for="genero">Escoge un género:</label>
                 <select id="genero" name="genero">
                     <option value="cumbia">Cumbia</option>
+                    <option value="electronica">Electrónica</option>
+                    <option value="festejo">Festejo</option>
+                    <option value="folk">Folk</option>
+                    <option value="funk">Funk</option>
+                    <option value="funk/soul">Funk/Soul</option>
                     <option value="huayno">Huayno</option>
                     <option value="marinera">Marinera</option>
+                    <option value="pop-rock">Pop-Rock</option>
+                    <option value="rock">Rock</option>
+                    <option value="salsa">Salsa</option>
+                    <option value="tondero">Tondero</option>
                     <option value="vals">Vals</option>
-                    <option value="criollo">Criollo</option>
                 </select>
+        
+                <label for="puntuacion_minima">Puntuación mínima (200-999):</label>
+                <input type="number" id="puntuacion_minima" name="puntuacion_minima" step="1" min="200" max="999" placeholder="Ejemplo: 300">
+        
                 <button type="submit">Recomendar</button>
             </form>
         </section>
-
-        <!--grafo respuesta/arbol-->
+        
+                
         <section class="grafo-section">
             <h2>Árbol de Recomendaciones</h2>
             <div class="grafo-container">
                 {{ grafo_html|safe }}
             </div>
         </section>
-        <!--recomendaciones personalizadas -->
+        
         <section class="recomendaciones-section">
             <h2>Recomendaciones Personalizadas</h2>
             <div class="recomendaciones-container">
-                <div class="recomendacion-card">
-                    <h3>Canción 1</h3>
-                    <p><strong>Artista:</strong> Artista 1</p>
-                    <p><strong>Género:</strong> Cumbia</p>
-                    <p><strong>Popularidad:</strong> 85</p>
-                    <!--i guess -->
-                    <audio controls>
-                        <source src="#" type="audio/mpeg">
-                        Tu navegador no soporta la reproducción de audio.
-                    </audio>
-                    <button>Favoritos</button>
-                </div>
-                <div class="recomendacion-card">
-                    <h3>Canción 2</h3>
-                    <p><strong>Artista:</strong> Artista 2</p>
-                    <p><strong>Género:</strong> Vals</p>
-                    <p><strong>Popularidad:</strong> 78</p>
-                    <audio controls>
-                        <source src="#" type="audio/mpeg">
-                        Tu navegador no soporta la reproducción de audio.
-                    </audio>
-                    <button>Favoritos</button>
-                </div>
-                <div class="recomendacion-card">
-                    <h3>Canción 3</h3>
-                    <p><strong>Artista:</strong> Artista 3</p>
-                    <p><strong>Género:</strong> Criollo</p>
-                    <p><strong>Popularidad:</strong> 92</p>
-                    <audio controls>
-                        <source src="#" type="audio/mpeg">
-                        Tu navegador no soporta la reproducción de audio.
-                    </audio>
-                    <button>Favoritos</button>
-                </div>
+                {% if recomendaciones %}
+                    {% for recomendacion in recomendaciones %}
+                        <div class="recomendacion-card">
+                            <h3>{{ recomendacion['cancion'] }}</h3>
+                                <p><strong>Artista:</strong> {{ recomendacion['artista'] }}</p>
+                                <p><strong>Género:</strong> {{ recomendacion['genero'] }}</p>
+                                <p><strong>Puntuación:</strong> {{ recomendacion['puntuacion'] }}</p>
+                                <p><strong>Tipo de Impacto:</strong> {{ recomendacion['tipo_impacto'] }}</p>
+                                <p><strong>Año:</strong> {{ recomendacion['anio'] }}</p>
+                            <audio controls>
+                                <source src="{{ recomendacion['audio_url'] }}" type="audio/mpeg">
+                                Tu navegador no soporta la reproducción de audio.
+                            </audio>
+                            <button>Favoritos</button>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No hay recomendaciones disponibles. Selecciona un género y puntuación mínima para ver sugerencias.</p>
+                {% endif %}
             </div>
         </section>
+        
+        
     </main>
 </body>
 </html>
