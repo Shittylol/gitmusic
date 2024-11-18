@@ -6,11 +6,12 @@
     <title>Árbol de Recomendaciones</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
-<body>
+<body style="background-color: red; color: #000000; font-family: Poppins, sans-serif;">
     <header>
         <h1>Selecciona un Género para Recomendaciones</h1>
-        <hr style="border: 6px dashed rgb(255, 191, 0);width: 50%">
+        <hr style="border: 3px solid rgb(255, 191, 0); border-radius: 5px; width: 60%; margin: 20px auto;">
     </header>
+
     <main>
         <section class="form-section">
             <form action="/dos" method="POST">
@@ -29,6 +30,17 @@
                     <option value="salsa">Salsa</option>
                     <option value="tondero">Tondero</option>
                     <option value="vals">Vals</option>
+                </select>
+
+                <label for="tipo_impacto">Escoge el impacto:</label>
+                <select id="tipo_impacto" name="tipo_impacto">
+                    <option value="AMBIENTAL">Ambiental </option>
+                    <option value="CULTURAL">Cultural</option>
+                    <option value="ECONOMICO">Económico</option>
+                    <option value="EDUCATIVO">Educativo </option>
+                    <option value="POLITICO">Político</option>
+                    <option value="RELIGION">Religioso</option>
+                    <option value="SOCIAL">Social</option>
                 </select>
         
                 <label for="puntuacion_minima">Puntuación mínima (200-999):</label>
@@ -57,7 +69,6 @@
                                 <p><strong>Género:</strong> {{ recomendacion['genero'] }}</p>
                                 <p><strong>Puntuación:</strong> {{ recomendacion['puntuacion'] }}</p>
                                 <p><strong>Tipo de Impacto:</strong> {{ recomendacion['tipo_impacto'] }}</p>
-                                <p><strong>Año:</strong> {{ recomendacion['anio'] }}</p>
                             <audio controls>
                                 <source src="{{ recomendacion['audio_url'] }}" type="audio/mpeg">
                                 Tu navegador no soporta la reproducción de audio.

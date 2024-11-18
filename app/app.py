@@ -5,7 +5,8 @@ from pyvis.network import Network
 from flask import Flask, render_template, request
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.cluster import KMeans
+import random
+from collections import deque
 
 app = Flask(__name__)
 
@@ -26,41 +27,33 @@ def cargar_canciones(file_path):
 
     return data
 
-#calcular similitudes
 def calcular_similitudes(canciones):
+    # Asegurarnos de que las columnas sean numéricas
+    canciones['PUNTUACION'] = pd.to_numeric(canciones['PUNTUACION'], errors='coerce')
+    canciones['IMPACTO SOCIAL'] = pd.to_numeric(canciones['IMPACTO SOCIAL'], errors='coerce')
+    
+    # Manejar valores nulos, si existen
+    canciones['PUNTUACION'] = canciones['PUNTUACION'].fillna(canciones['PUNTUACION'].mean())
+    canciones['IMPACTO SOCIAL'] = canciones['IMPACTO SOCIAL'].fillna(canciones['IMPACTO SOCIAL'].mean())
+    
+    # Escalar las características
     scaler = MinMaxScaler()
     canciones_features = canciones[['PUNTUACION', 'IMPACTO SOCIAL']].values
     canciones_normalizadas = scaler.fit_transform(canciones_features)
 
+    # Calcular similitudes
     similitudes = cosine_similarity(canciones_normalizadas)
     return similitudes
 
-def agrupar_canciones(canciones, n_clusters=5):
-    
-    #inicializa
-    canciones['CLUSTER'] = -1
+# Obtener recomendaciones
+def obtener_recomendaciones(canciones, genero, puntuacion_referencia):
+    # Filtra por género y puntuación mínima
+    recomendaciones = canciones[
+        (canciones['GENERO'].str.lower() == genero.lower()) & 
+        (canciones['PUNTUACION'] >= puntuacion_referencia)
+    ]
 
-    #itera sobre cada género único en la columna genero
-    for genero in canciones['GENERO'].unique():
-        #filtra canciones que pertenecen al género actual
-        subset = canciones[canciones['GENERO'] == genero]
-
-        #no agrupa si hay una cancion
-        if len(subset) > 1:  
-            
-            features = subset[['PUNTUACION']]
-            
-            #número de clusters no mayor al número de canciones en el subconjunto
-            kmeans = KMeans(n_clusters=min(n_clusters, len(subset)), random_state=42)
-            
-            #los clusters para las canciones del género actual
-            clusters = kmeans.fit_predict(features)
-            
-            #actualiza cluster a canciones de genero y puntuacion actual
-            canciones.loc[subset.index, 'CLUSTER'] = clusters
-
-    return canciones
-
+    return recomendaciones
 
 #construye grafo principal
 def construir_grafo(canciones):
@@ -92,7 +85,7 @@ def construir_grafo(canciones):
         G.add_node(idx, label=cancion, pos=posiciones[idx], 
                 genero=genero, tipo_impacto=row['TIPO DE IMPACTO'], title=info_tooltip)
 
-    print('Aca nfor')  #optimiza
+    print('Aca nfor')  
     for i in range(len(canciones) - 1):
         for j in range(i + 1, len(canciones)):
             # ver que compartan el mismo género y tipo de impacto
@@ -101,7 +94,6 @@ def construir_grafo(canciones):
 
                 #ver si la similitud entre las canciones supera un umbral
                 if similitudes[i][j] > 0.5: 
-                    #no más de 3 conexiones por canción
                     if len(list(G.neighbors(i))) < 3 and len(list(G.neighbors(j))) < 3:
                         G.add_edge(i, j, weight=similitudes[i][j])
     print('Aca n')
@@ -119,26 +111,14 @@ def construir_grafo(canciones):
 
     return net.generate_html()
 
-def obtener_recomendaciones(canciones, cluster, genero, puntuacion_referencia, rango=100):
-   
-    #el rango de puntuación
-    puntuacion_min = puntuacion_referencia - rango
-    puntuacion_max = puntuacion_referencia + rango
 
-    #filtra por cluster, género y rango de puntuación (1 filtro)
-    recomendaciones = canciones[
-        (canciones['CLUSTER'] == cluster) &
-        (canciones['GENERO'].str.lower() == genero.lower()) &
-        (canciones['PUNTUACION'] >= puntuacion_min) &
-        (canciones['PUNTUACION'] <= puntuacion_max)
-    ]
-
-    return recomendaciones
-
-#grafo resultante
 def construir_grafo_recomendaciones(canciones_filtradas):
-  
     grafo = nx.Graph()
+
+    similitudes = calcular_similitudes(canciones_filtradas)
+    print(f"Estas son las similitudes: {similitudes}")
+
+    lista_indices = []
 
     for idx, row in canciones_filtradas.iterrows():
         grafo.add_node(idx, 
@@ -146,40 +126,55 @@ def construir_grafo_recomendaciones(canciones_filtradas):
                        artista=row['GRUPO/ARTISTA'], 
                        genero=row['GENERO'], 
                        tipo_impacto=row['TIPO DE IMPACTO'])
+        lista_indices.append(idx)  
 
-    for i, row_i in canciones_filtradas.iterrows():
-        for j, row_j in canciones_filtradas.iterrows():
-            if i != j and (row_i['GRUPO/ARTISTA'] == row_j['GRUPO/ARTISTA'] or row_i['TIPO DE IMPACTO'] == row_j['TIPO DE IMPACTO']):
-                grafo.add_edge(i, j)
-    
+    for i in range(len(canciones_filtradas)):
+        for j in range(i + 1, len(canciones_filtradas)):  
+            if similitudes[i][j] > 0.9995:  
+                grafo.add_edge(lista_indices[i], lista_indices[j], peso=similitudes[i][j])
+                
+    print(f"Aristas: {grafo.edges(data=True)}")  
+
     return grafo
 
-def bfs_recomendaciones(grafo, nodo_inicial, max_recomendaciones=5, tipo_impacto=None, impacto_social_min=0):
-   
-    visitados = set()
-    recomendaciones = []
-    cola = [nodo_inicial]
 
-    while cola and len(recomendaciones) < max_recomendaciones:
-        nodo = cola.pop(0)
-        if nodo not in visitados:
-            visitados.add(nodo)
+def bfs_recomendaciones(grafo, nodo_inicial, max_recomendaciones=5, tipo_impacto=None):
+    cola = deque([nodo_inicial])  
+    visitados = set([nodo_inicial]) 
+    recomendaciones = []  #almacenar las recomendaciones
 
-            atributos = grafo.nodes[nodo]
-            cumple_impacto = tipo_impacto is None or atributos.get('tipo_impacto') == tipo_impacto
-            cumple_impacto_social = atributos.get('impacto_social', 0) >= impacto_social_min
+    print(f"Este es el grafo del bfs antes: {grafo.nodes(data=True)}")  
 
-            if cumple_impacto and cumple_impacto_social:
-                recomendaciones.append(nodo)
+    if nodo_inicial not in grafo:
+        print(f"El nodo inicial {nodo_inicial} no existe en el grafo.")
+        return []  
+    else:
+        print(f"El nodo inicial {nodo_inicial} sí está en el grafo.")
+    
+    while cola:
+        nodo_actual = cola.popleft()  #primer nodo de la cola
 
-            for vecino in grafo.neighbors(nodo):
-                if vecino not in visitados:
-                    cola.append(vecino)
+        atributos = grafo.nodes[nodo_actual]
+        print(f"Nodo actual: {nodo_actual}, atributos: {atributos}")
 
-    return recomendaciones
+        if tipo_impacto is None or atributos.get('tipo_impacto') == tipo_impacto:
+            print(f"Nodo {nodo_actual} cumple con el filtro de impacto: {tipo_impacto}")
+            recomendaciones.append(nodo_actual) 
+
+        for vecino in grafo.neighbors(nodo_actual):
+            if vecino not in visitados:
+                visitados.add(vecino)
+                print(f"Agregando vecino {vecino} a la cola.")
+                cola.append(vecino)  
+
+    print(recomendaciones)
+    random.shuffle(recomendaciones)
+    print(f"Recomendaciones desordenadas: {recomendaciones}")
+
+    return recomendaciones[:max_recomendaciones]
 
 
-# Página principal
+#pagina 1
 @app.route("/")
 def index():
     canciones = cargar_canciones(file_path)
@@ -189,93 +184,91 @@ def index():
         "bienvenida": "BIENVENIDO A WEOLD"
     })
 
-#muestra pagina 2
+#página 2
 @app.route("/uno")
 def mostrar_pagina_dos():
     return render_template("uno.html")
 
-#muestra pagina 3
+#página 3 con recomendaciones
 @app.route("/dos", methods=["GET", "POST"])
 def mostrar_pagina_dos_actual():
-    
     canciones = cargar_canciones(file_path)
-    canciones = agrupar_canciones(canciones, n_clusters=5)
-
+    grafo_html = ""  
+    recomendaciones = []  
     error = None
-    grafo_html = None
-    recomendaciones = []
-    genero = None  #
-    if request.method == "POST":
-        genero = request.form.get("genero", None)
-        puntuacion_referencia = request.form.get("puntuacion_minima", 200)
-        tipo_impacto = request.form.get("tipo_impacto", None)
-        impacto_social_min = request.form.get("impacto_social_min", 0)
 
-        if not genero or genero.strip() == "":
-            error = "Por favor, selecciona un género."
+    if request.method == "POST":
+        genero = request.form.get("genero", "").strip()
+        puntuacion_referencia = request.form.get("puntuacion_minima", 200)
+        tipo_impacto = request.form.get("tipo_impacto", "").strip()
+
+        if not genero or not tipo_impacto:
+            error = "Por favor, selecciona un género y un tipo de impacto."
         else:
             try:
                 puntuacion_referencia = int(puntuacion_referencia)
-                impacto_social_min = int(impacto_social_min)
                 if puntuacion_referencia < 200 or puntuacion_referencia > 999:
                     raise ValueError
             except ValueError:
-                error = "Por favor, ingresa valores válidos para puntuación e impacto social."
+                error = "Por favor, ingresa una puntuación válida entre 200 y 999."
 
             if not error:
-                cluster_relevante = canciones.loc[
-                    canciones['GENERO'].str.lower() == genero.lower(), 'CLUSTER'
-                ].mode()
+                recomendaciones_df = obtener_recomendaciones(canciones, genero, puntuacion_referencia)
 
-                if cluster_relevante.empty:
-                    error = "No se encontraron recomendaciones para el género seleccionado."
+                if recomendaciones_df.empty:
+                    error = "No se encontraron canciones para los criterios seleccionados."
                 else:
-                    cluster = cluster_relevante.iloc[0]
-                    recomendaciones_df = obtener_recomendaciones(canciones, cluster, genero, puntuacion_referencia, rango=100)
+                    recomendaciones_df = recomendaciones_df.reset_index(drop=True)
 
-                    if recomendaciones_df.empty:
-                        error = "No se encontraron canciones para los criterios seleccionados."
-                    else:
-                        grafo_recomendaciones = construir_grafo_recomendaciones(recomendaciones_df)
+                    grafo_recomendaciones = construir_grafo_recomendaciones(recomendaciones_df)
 
-                        nodo_inicial = recomendaciones_df.index[0]
+                    nodo_inicial = None
+                    while not nodo_inicial:
+                        nodo_inicial = random.choice(recomendaciones_df.index)
+                        if recomendaciones_df.loc[nodo_inicial, "TIPO DE IMPACTO"] == tipo_impacto:
+                            break
+                        else:
+                            nodo_inicial = None
 
-                        nodos_recomendados = bfs_recomendaciones(
-                            grafo_recomendaciones,
-                            nodo_inicial,
-                            max_recomendaciones=5,
-                            tipo_impacto=tipo_impacto,
-                            impacto_social_min=impacto_social_min,
+                    print(f"Nodo inicial seleccionado: {nodo_inicial}")
+
+                    nodos_recomendados = bfs_recomendaciones(
+                        grafo_recomendaciones,
+                        nodo_inicial,
+                        max_recomendaciones=5,
+                        tipo_impacto=tipo_impacto
+                    )
+                    print(f"Nodos recomendados por BFS: {nodos_recomendados}")
+
+                    net = Network(height="750px", width="100%", bgcolor="#FF6347", font_color="black")
+                    for nodo in nodos_recomendados:
+                        nodo = int(nodo)  #nodo a entero
+                        cancion = recomendaciones_df.loc[nodo]
+                        net.add_node(
+                            nodo,
+                            label=cancion["CANCION"],
+                            title=f"Artista: {cancion['GRUPO/ARTISTA']}\nImpacto: {cancion['TIPO DE IMPACTO']}\nPuntuación: {cancion['PUNTUACION']}",
+                            color="#fab802"
                         )
+                    for i in range(len(nodos_recomendados)):
+                        for j in range(i + 1, len(nodos_recomendados)):
+                            net.add_edge(nodos_recomendados[i], nodos_recomendados[j])
 
-                        recomendaciones = [
-                            {
-                                "cancion": recomendaciones_df.loc[nodo, "CANCION"],
-                                "artista": recomendaciones_df.loc[nodo, "GRUPO/ARTISTA"],
-                                "genero": recomendaciones_df.loc[nodo, "GENERO"],
-                                "puntuacion": recomendaciones_df.loc[nodo, "PUNTUACION"],
-                                "tipo_impacto": recomendaciones_df.loc[nodo, "TIPO DE IMPACTO"],
-                                "impacto_social": recomendaciones_df.loc[nodo, "IMPACTO SOCIAL"],
-                                "audio_url": "#"  
-                            }
-                            for nodo in nodos_recomendados
-                        ]
+                    grafo_html = net.generate_html()
+                    recomendaciones = [
+                        {
+                            "cancion": recomendaciones_df.loc[nodo, "CANCION"],
+                            "artista": recomendaciones_df.loc[nodo, "GRUPO/ARTISTA"],
+                            "genero": recomendaciones_df.loc[nodo, "GENERO"],
+                            "puntuacion": recomendaciones_df.loc[nodo, "PUNTUACION"],
+                            "tipo_impacto": recomendaciones_df.loc[nodo, "TIPO DE IMPACTO"],
+                            "impacto_social": recomendaciones_df.loc[nodo, "IMPACTO SOCIAL"],
+                            "audio_url": "#"
+                        }
+                        for nodo in nodos_recomendados
+                    ]
 
-                        net = Network(height="750px", width="100%", font_color="black", bgcolor="#FF6347")
-                        for nodo in nodos_recomendados:
-                            datos = grafo_recomendaciones.nodes[nodo]
-                            net.add_node(
-                                str(nodo),
-                                label=datos["cancion"],
-                                title=f"{datos['cancion']} - {datos['artista']} ({datos['tipo_impacto']})"
-                            )
-                        for u, v in grafo_recomendaciones.edges():
-                            if u in nodos_recomendados and v in nodos_recomendados:
-                                net.add_edge(str(u), str(v))
-
-                        grafo_html = net.generate_html()
-
-    return render_template("dos.html", genero=genero, grafo_html=grafo_html, recomendaciones=recomendaciones, error=error)
+    return render_template("dos.html", grafo_html=grafo_html, recomendaciones=recomendaciones, error=error)
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
