@@ -155,19 +155,7 @@ def construir_grafo_recomendaciones(canciones_filtradas):
     return grafo
 
 def bfs_recomendaciones(grafo, nodo_inicial, max_recomendaciones=5, tipo_impacto=None, impacto_social_min=0):
-    """
-    Realiza un recorrido BFS en el grafo para ajustar recomendaciones basadas en tipo de impacto e impacto social.
-
-    Args:
-        grafo (nx.Graph): Grafo de canciones filtradas.
-        nodo_inicial (int): Nodo inicial para iniciar el BFS.
-        max_recomendaciones (int): Máximo número de canciones recomendadas.
-        tipo_impacto (str): Tipo de impacto a considerar en las recomendaciones.
-        impacto_social_min (int): Mínimo nivel de impacto social requerido.
-
-    Returns:
-        list: Lista de IDs de nodos recomendados.
-    """
+   
     visitados = set()
     recomendaciones = []
     cola = [nodo_inicial]
@@ -177,7 +165,6 @@ def bfs_recomendaciones(grafo, nodo_inicial, max_recomendaciones=5, tipo_impacto
         if nodo not in visitados:
             visitados.add(nodo)
 
-            # Verificar atributos del nodo actual
             atributos = grafo.nodes[nodo]
             cumple_impacto = tipo_impacto is None or atributos.get('tipo_impacto') == tipo_impacto
             cumple_impacto_social = atributos.get('impacto_social', 0) >= impacto_social_min
@@ -185,7 +172,6 @@ def bfs_recomendaciones(grafo, nodo_inicial, max_recomendaciones=5, tipo_impacto
             if cumple_impacto and cumple_impacto_social:
                 recomendaciones.append(nodo)
 
-            # Agregar vecinos a la cola
             for vecino in grafo.neighbors(nodo):
                 if vecino not in visitados:
                     cola.append(vecino)
@@ -211,16 +197,14 @@ def mostrar_pagina_dos():
 #muestra pagina 3
 @app.route("/dos", methods=["GET", "POST"])
 def mostrar_pagina_dos_actual():
-    # Cargar las canciones desde el archivo y agruparlas en clusters
+    
     canciones = cargar_canciones(file_path)
     canciones = agrupar_canciones(canciones, n_clusters=5)
 
-    # Valores predeterminados para el renderizado
     error = None
     grafo_html = None
     recomendaciones = []
-    genero = None  # Inicializar genero con None
-
+    genero = None  #
     if request.method == "POST":
         genero = request.form.get("genero", None)
         puntuacion_referencia = request.form.get("puntuacion_minima", 200)
@@ -246,20 +230,16 @@ def mostrar_pagina_dos_actual():
                 if cluster_relevante.empty:
                     error = "No se encontraron recomendaciones para el género seleccionado."
                 else:
-                    # Obtener canciones recomendadas con rango dinámico
                     cluster = cluster_relevante.iloc[0]
                     recomendaciones_df = obtener_recomendaciones(canciones, cluster, genero, puntuacion_referencia, rango=100)
 
                     if recomendaciones_df.empty:
                         error = "No se encontraron canciones para los criterios seleccionados."
                     else:
-                        # Construir el grafo para las canciones filtradas
                         grafo_recomendaciones = construir_grafo_recomendaciones(recomendaciones_df)
 
-                        # Seleccionar el nodo inicial más cercano a la puntuación de referencia
                         nodo_inicial = recomendaciones_df.index[0]
 
-                        # Recomendaciones con BFS
                         nodos_recomendados = bfs_recomendaciones(
                             grafo_recomendaciones,
                             nodo_inicial,
@@ -268,7 +248,6 @@ def mostrar_pagina_dos_actual():
                             impacto_social_min=impacto_social_min,
                         )
 
-                        # Lista de recomendaciones finales
                         recomendaciones = [
                             {
                                 "cancion": recomendaciones_df.loc[nodo, "CANCION"],
@@ -277,12 +256,11 @@ def mostrar_pagina_dos_actual():
                                 "puntuacion": recomendaciones_df.loc[nodo, "PUNTUACION"],
                                 "tipo_impacto": recomendaciones_df.loc[nodo, "TIPO DE IMPACTO"],
                                 "impacto_social": recomendaciones_df.loc[nodo, "IMPACTO SOCIAL"],
-                                "audio_url": "#"  # Aquí podrías añadir una URL real para la canción
+                                "audio_url": "#"  
                             }
                             for nodo in nodos_recomendados
                         ]
 
-                        # Construir el grafo de recomendaciones para el HTML
                         net = Network(height="750px", width="100%", font_color="black", bgcolor="#FF6347")
                         for nodo in nodos_recomendados:
                             datos = grafo_recomendaciones.nodes[nodo]
@@ -295,7 +273,6 @@ def mostrar_pagina_dos_actual():
                             if u in nodos_recomendados and v in nodos_recomendados:
                                 net.add_edge(str(u), str(v))
 
-                        # Generar HTML del grafo
                         grafo_html = net.generate_html()
 
     return render_template("dos.html", genero=genero, grafo_html=grafo_html, recomendaciones=recomendaciones, error=error)
